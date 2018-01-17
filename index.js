@@ -38,7 +38,7 @@ class XHR {
         return (new Promise((resolve, reject) => {
             let xhr = XHR.Obj();
 
-            xhr.timeout = 3000; // 3s timeout
+            xhr.timeout = 60000; // 1m timeout
 
             xhr.open(method, url, async);
 
