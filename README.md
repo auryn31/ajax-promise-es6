@@ -1,13 +1,14 @@
+# Fork to set Timeout to 1 Minute
 # ajax-promise-es6
 Promise based Ajax module for react/react-native apps.
 
-##Installation:
+## Installation:
 ```npm i -S ajax-promise-es6```
 
 ## Usage:
 
 ```javascript
-// default timeout is 3000ms
+// default timeout is 60000ms
 // url    : {type: 'string'}
 // body   : {type: 'object'}
 // headers: {type: 'object', optional: 'true'}
@@ -28,7 +29,7 @@ Ajax.get(url, body, headers).then((res)=> {
 
 ```
 
-##Example:
+## Example:
 ```javascript
 Ajax.post(url,
              {
