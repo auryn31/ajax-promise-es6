@@ -4,100 +4,96 @@
 'use strict';
 
 const versions = [
-            "MSXML2.XmlHttp.6.0",
-            "MSXML2.XmlHttp.5.0",
-            "MSXML2.XmlHttp.4.0",
-            "MSXML2.XmlHttp.3.0",
-            "MSXML2.XmlHttp.2.0",
-            "Microsoft.XmlHttp"
-        ];
+	'MSXML2.XmlHttp.6.0',
+	'MSXML2.XmlHttp.5.0',
+	'MSXML2.XmlHttp.4.0',
+	'MSXML2.XmlHttp.3.0',
+	'MSXML2.XmlHttp.2.0',
+	'Microsoft.XmlHttp'
+];
+
+const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
 class XHR {
-    static Obj() {
-        if (typeof XMLHttpRequest !== 'undefined') {
-            return new XMLHttpRequest();
-        }
+	static obj() {
+		if (typeof XMLHttpRequest !== 'undefined') {
+			return new XMLHttpRequest();
+		}
 
-        let xhr;
-        for (let version of versions) {
-            try {
-                xhr = new ActiveXObject(version);
-                break;
-            } catch (e) {
-            }
-        }
+		let xhr;
+		for (const version of versions) {
+			try {
+				xhr = new ActiveXObject(version);
+				break;
+			} catch (err) {}
+		}
 
-        return xhr;
-    }
+		return xhr;
+	}
 
-    static send(url, method, data, headers, async) {
-        if (async === undefined) {
-            async = true;
-        }
+	static send(url, method, data, headers, async, timeout) {
+		return (new Promise((resolve, reject) => {
+			const xhr = XHR.obj();
 
-        return (new Promise((resolve, reject) => {
-            let xhr = XHR.Obj();
+			xhr.timeout = timeout * 1000;
 
-            xhr.timeout = 60000; // 1m timeout
+			xhr.open(method, url, async);
 
-            xhr.open(method, url, async);
+			if (headers) {
+				for (const key in headers) {
+					if (headers.hasOwnProperty(key)) {
+						xhr.setRequestHeader(key, headers[key]);
+					}
+				}
+			}
 
-            if (headers) {
-                for (let key in headers) {
-                    if (headers.hasOwnProperty(key)) {
-                        xhr.setRequestHeader(key, headers[key]);
-                    }
-                }
-            }
+			if (method === 'POST') {
+				xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+			}
 
-            if (method == 'POST') {
-                xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            }
+			xhr.onload = function () {
+				if (this.status >= 200 && this.status < 300) {
+					resolve(xhr.response);
+				} else {
+					reject({
+						status: this.status,
+						statusText: xhr.statusText
+					});
+				}
+			};
 
-            xhr.onload = function () {
-                if (this.status >= 200 && this.status < 300) {
-                    resolve(xhr.response);
-                } else {
-                    reject({
-                        status    : this.status,
-                        statusText: xhr.statusText
-                    });
-                }
-            };
+			xhr.onerror = function () {
+				reject({
+					status: this.status,
+					statusText: xhr.statusText
+				});
+			};
 
-            xhr.onerror = function () {
-                reject({
-                    status    : this.status,
-                    statusText: xhr.statusText
-                });
-            };
+			xhr.ontimeout = function () {
+				reject({
+					status: this.status,
+					statusText: xhr.statusText
+				});
+			};
 
-            xhr.ontimeout = function () {
-                reject({
-                    status    : this.status,
-                    statusText: xhr.statusText
-                });
-            };
-
-            xhr.send(data);
-        }));
-    }
+			xhr.send(data);
+		}));
+	}
 }
 
 export default class Ajax {
-    static get(url, data, headers, async) {
-        let query = [];
-        for (let key in data) {
-            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-        }
-        return XHR.send(url + (query.length ? '?' + query.join('&') : ''), 'GET', null, headers, async);
-    }
+	constructor(async = true, timeout = 3) {
+		this.async = async;
+		this.timeout = timeout;
+	}
 
-    static post(url, data, headers, async) {
-        let query = [];
-        for (let key in data) {
-            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-        }
-        return XHR.send(url, 'POST', query.join('&'), headers, async);
-    }
+	get(url, data = null, headers = null) {
+		const query = (data === null || data.keys !== 'undefined') ? [] : data.keys().map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+		return XHR.send(url + (query.length ? '?' + query.join('&') : ''), 'GET', null, headers, this.async, this.timeout);
+	}
+
+	post(url, data = null, headers = null, async = true, timeout = 3) {
+		const query = (data === null || data.keys !== 'undefined') ? [] : data.keys().map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+		return XHR.send(url, 'POST', query.join('&'), headers, async, timeout);
+	}
 }

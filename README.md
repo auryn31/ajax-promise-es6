@@ -8,20 +8,21 @@ Promise based Ajax module for react/react-native apps.
 ## Usage:
 
 ```javascript
-// default timeout is 60000ms
 // url    : {type: 'string'}
-// body   : {type: 'object'}
-// headers: {type: 'object', optional: 'true'}
+// body   : {type: 'object'} //default null
+// headers: {type: 'object', optional: 'true'} //default null
+// async: true //default
+// timeout: 3 //default 3s
 
 import Ajax from 'ajax-promise-es6'
-
-Ajax.post(url, body, headers).then((res)=> {  
+var ajax = new Ajax();
+ajax.post(url).then((res)=> {  
             console.log(res);  
   }).catch((err)=> {
       console.log(err);
   });
 
-Ajax.get(url, body, headers).then((res)=> {  
+Ajax.get(url).then((res)=> {  
             console.log(res);  
   }).catch((err)=> {
       console.log(err);
@@ -31,7 +32,8 @@ Ajax.get(url, body, headers).then((res)=> {
 
 ## Example:
 ```javascript
-Ajax.post(url,
+var ajax = new Ajax();
+ajax.post(url,
              {
                 foo: 'hello',   // body data
                 bar: 'there'
