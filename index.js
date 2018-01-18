@@ -12,8 +12,6 @@ const versions = [
 	'Microsoft.XmlHttp'
 ];
 
-const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
-
 class XHR {
 	static obj() {
 		if (typeof XMLHttpRequest !== 'undefined') {
